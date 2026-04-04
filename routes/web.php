@@ -14,18 +14,24 @@ Route::get('/', function () { // todo change
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::resource('template', \App\Http\Controllers\TemplateController::class)
-    ->except(['show'])
-    ->middleware(['auth', 'verified']);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () { // todo remove/change
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
+    Route::resource('template', \App\Http\Controllers\TemplateController::class)
+        ->except(['show']);
+
+    Route::resource('document', \App\Http\Controllers\DocumentController::class)
+        ->except(['edit', 'update', 'show']);
+    Route::post('/document/{id}/download', [\App\Http\Controllers\DocumentController::class, 'download'])
+        ->name('document.download');
+});
 
 require __DIR__.'/auth.php';

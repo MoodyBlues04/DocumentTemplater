@@ -1,7 +1,7 @@
 import { useForm, Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Edit({ template }) {
+export default function TemplatesEdit({ template }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: template.name,
         _method: 'PUT',

@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Http\Requests\TemplateStoreRequest;
+use App\Http\Requests\TemplateUpdateRequest;
 use App\Models\Template;
+use App\Models\TemplateField;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -22,6 +24,11 @@ readonly class TemplateService
     public function getAllByUserId(int $userId): Collection
     {
         return Template::query()->with(['file', 'fields'])->where('user_id', $userId)->get();
+    }
+
+    public function delete(Template $template): void
+    {
+        $template->delete();
     }
 
     public function create(TemplateStoreRequest $request): Template
@@ -45,8 +52,42 @@ readonly class TemplateService
         });
     }
 
-    public function delete(Template $template): void
+    public function update(TemplateUpdateRequest $request, Template $template)
     {
-        $template->delete();
+        return DB::transaction(function () use ($request, $template) {
+            $template->name = $request->input('name');
+            $template->save();
+
+            $this->deleteFields($request, $template->id);
+            $this->upsertFields($request, $template->id);
+        });
+    }
+
+    private function deleteFields(TemplateUpdateRequest $request, int $templateId): void
+    {
+        $templateFieldIdsToDelete = $request->collect('fields')
+            ->filter(fn ($field) => $field['is_deleted'] === true)
+            ->pluck('id')
+            ->unique()
+            ->all();
+
+        $deletedCount = TemplateField::query()
+            ->where('template_id', $templateId)
+            ->where('id', 'in', $templateFieldIdsToDelete)
+            ->delete();
+
+        if (count($templateFieldIdsToDelete) !== $deletedCount) {
+            throw new \RuntimeException('Cannot delete some fields'); // todo custom exception + handler
+        }
+    }
+
+    private function upsertFields(TemplateUpdateRequest $request, int $templateId): void
+    {
+        $updatedTemplateFields = $request->collect('fields')
+            ->filter(fn ($field) => $field['is_deleted'] === false)
+            ->map(fn ($templateField) => array_merge($templateField, ['template_id' => $templateId]))
+            ->all();
+
+        TemplateField::query()->upsert($updatedTemplateFields, ['id']);
     }
 }

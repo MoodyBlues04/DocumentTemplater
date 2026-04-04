@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TemplateStoreRequest;
+use App\Http\Requests\TemplateUpdateRequest;
 use App\Models\Template;
 use App\Services\TemplateService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
@@ -48,7 +48,7 @@ class TemplateController extends Controller
 
         return redirect()
             ->route('template.edit', $template)
-            ->with('success', 'Template created');
+            ->with('success', "Template '$template->name' created successfully");
     }
 
     /**
@@ -66,13 +66,15 @@ class TemplateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Template $template)
+    public function update(TemplateUpdateRequest $request, Template $template)
     {
         Gate::authorize('update', $template);
 
+        $this->templateService->update($request, $template);
+
         return redirect()
             ->route('template.index')
-            ->with('warning', "Update not supported yet. Tried to update $template->id");
+            ->with('warning', "Template '$template->name' updated successfully");
     }
 
     /**
@@ -86,6 +88,6 @@ class TemplateController extends Controller
 
         return redirect()
             ->route('template.index')
-            ->with('success', 'Template deleted successfully!');
+            ->with('success', "Template '$template->name' deleted successfully!");
     }
 }

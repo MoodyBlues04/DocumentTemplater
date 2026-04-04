@@ -69,6 +69,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Templates
                                 </NavLink>
+                                <NavLink
+                                    href={route('document.index')}
+                                    active={route().current('document.index')}
+                                >
+                                    Documents
+                                </NavLink>
                             </div>
                         </div>
 
