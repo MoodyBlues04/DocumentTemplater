@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Enum\Orientation;
 use App\Models\File;
 use App\Models\Template;
 use App\Models\User;
@@ -23,6 +24,7 @@ class TemplateFactory extends Factory
         return [
             'user_id' => User::query()->inRandomOrder()->firstOrFail()->id,
             'file_id' => File::query()->inRandomOrder()->firstOrFail()->id,
+            'orientation' => $this->faker->randomElement(Orientation::cases()),
             'name' => Str::random(10),
         ];
     }

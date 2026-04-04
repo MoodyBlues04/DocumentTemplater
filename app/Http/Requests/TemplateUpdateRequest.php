@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Enum\Orientation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,6 +27,7 @@ class TemplateUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:1|max:100',
+            'orientation' => 'required|string|' . Rule::enum(Orientation::class),
 
             'fields.*.id' => 'nullable|integer|' . Rule::exists('template_field', 'id'),
             'fields.*.is_deleted' => 'required|boolean',

@@ -1,8 +1,9 @@
 import { useForm, Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function TemplatesEdit({ template }) {
+export default function TemplatesEdit({ template, orientations }) {
     const { data, setData, post, processing, errors, reset } = useForm({
+        orientation: template.orientation,
         name: template.name,
         _method: 'PUT',
     });
@@ -43,6 +44,28 @@ export default function TemplatesEdit({ template }) {
                                     />
                                     {errors.name && (
                                         <div className="text-red-600 text-sm mt-1">{errors.name}</div>
+                                    )}
+                                </div>
+
+                                {/* Orientation Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Select Orientation
+                                    </label>
+                                    <select
+                                        value={data.orientation}
+                                        onChange={(e) => setData('orientation', e.target.value)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        required
+                                    >
+                                        {orientations.map((orientation) => (
+                                            <option key={orientation} value={orientation} selected={orientation === 'vertical'}>
+                                                {orientation}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.orientation && (
+                                        <div className="text-red-600 text-sm mt-1">{errors.orientation}</div>
                                     )}
                                 </div>
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\TemplateStoreRequest;
 use App\Http\Requests\TemplateUpdateRequest;
+use App\Models\Enum\Orientation;
 use App\Models\Template;
 use App\Models\TemplateField;
 use Illuminate\Database\Eloquent\Collection;
@@ -36,6 +37,7 @@ readonly class TemplateService
         return DB::transaction(function () use ($request) {
             $userId = $request->user()->id;
             $templateName = $request->input('name');
+            $templateOrientation = Orientation::from($request->input('orientation'));
             $now = now()->timestamp;
 
             $file = $this->fileService->create(
@@ -48,6 +50,7 @@ readonly class TemplateService
                 'file_id' => $file->id,
                 'user_id' => $userId,
                 'name' => $templateName,
+                'orientation' => $templateOrientation,
             ]);
         });
     }

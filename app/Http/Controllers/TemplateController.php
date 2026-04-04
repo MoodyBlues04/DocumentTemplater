@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TemplateStoreRequest;
 use App\Http\Requests\TemplateUpdateRequest;
+use App\Models\Enum\Orientation;
 use App\Models\Template;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Gate;
@@ -34,7 +35,9 @@ class TemplateController extends Controller
     public function create()
     {
         Gate::authorize('create', Template::class);
-        return Inertia::render('Template/Create');
+        return Inertia::render('Template/Create', [
+            'orientations' => Orientation::cases(),
+        ]);
     }
 
     /**
@@ -60,6 +63,7 @@ class TemplateController extends Controller
 
         return Inertia::render('Template/Edit', [
             'template' => $template->load('file'),
+            'orientations' => Orientation::cases(),
         ]);
     }
 

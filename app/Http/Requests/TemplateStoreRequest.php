@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Enum\Orientation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TemplateStoreRequest extends FormRequest
 {
@@ -24,6 +26,7 @@ class TemplateStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:1|max:100',
+            'orientation' => 'required|string|' . Rule::enum(Orientation::class),
             'file' => 'required|file|mimes:pdf|max:10240',
         ];
     }

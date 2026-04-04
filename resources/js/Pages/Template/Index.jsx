@@ -30,6 +30,7 @@ export default function TemplatesIndex({ templates }) {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orientation</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fields</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -40,6 +41,7 @@ export default function TemplatesIndex({ templates }) {
                                         <tr key={template.id}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{template.id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{template.name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{template.orientation}</td>
                                             <td className="px-6 py-4 text-sm text-gray-500">{template.file.id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{template.fields.map((field) => `"${field.name}"`).join(', ')}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
