@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('template_id')->constrained();
             $table->unsignedInteger('font_size');
+            $table->string('name');
             $table->string('font_name');
             $table->string('font_color');
             $table->unsignedInteger('height');
@@ -23,6 +24,8 @@ return new class extends Migration
             $table->bigInteger('x_coordinate');
             $table->bigInteger('y_coordinate');
             $table->timestamps();
+
+            $table->unique(['template_id', 'name']);
         });
     }
 

@@ -7,6 +7,7 @@ use App\Models\ValueObject\Font;
 use App\Models\ValueObject\Size;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TemplateField extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'template_id',
         'font_size',
