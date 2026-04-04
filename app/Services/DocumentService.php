@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 readonly class DocumentService
 {
-    private const DOCUMENT_STORAGE_DIR = 'documents';
-
     public function __construct(
         private TemplateFillingFacade $templateFillingFacade,
         private FileService $fileService,
@@ -37,19 +35,13 @@ readonly class DocumentService
     {
         $template = Template::query()->where('id', $request->input('template_id'))->firstOrFail();
 
-        $filledTemplate = $this->templateFillingFacade->fill($template, $request->file('file'));
+        $filledTemplatePath = $this->templateFillingFacade->fill($template, $request->file('file'));
 
-        return DB::transaction(function () use ($template, $filledTemplate, $request) {
+        return DB::transaction(function () use ($template, $filledTemplatePath, $request) {
             $documentName = $request->input('name');
-            $now = now()->timestamp;
             $userId = $request->user()->id;
 
-            $file = $this->fileService->create(
-                "$documentName-$now." . $filledTemplate->getExtension(),
-                self::DOCUMENT_STORAGE_DIR,
-                $userId,
-                $filledTemplate
-            );
+            $file = $this->fileService->create($filledTemplatePath);
 
             return Document::query()->create([
                 'file_id' => $file->id,

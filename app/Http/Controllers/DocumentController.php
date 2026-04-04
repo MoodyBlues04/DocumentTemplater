@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DocumentStoreRequest;
 use App\Models\Document;
+use App\Models\File;
 use App\Services\DocumentService;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Gate;
@@ -67,7 +68,10 @@ class DocumentController extends Controller
     {
         Gate::authorize('view', $document);
 
-        return response()->download($document->file->path, $document->name);
+        return response()->download(
+            $document->file->getFullPath(),
+            "$document->name.{$document->file->getExtension()}"
+        );
     }
 
     /**

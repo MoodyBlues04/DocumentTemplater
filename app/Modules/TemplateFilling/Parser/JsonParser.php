@@ -14,7 +14,7 @@ class JsonParser implements PayloadParser
         return $payloadType === PayloadType::JSON;
     }
 
-    public function parse(UploadedFile $payloadFile): Payload
+    public function parse(UploadedFile $payloadFile, array $fields): Payload
     {
         $content = $payloadFile->getContent();
         $rawPayload = json_decode($content, true);
@@ -22,30 +22,21 @@ class JsonParser implements PayloadParser
             throw new \InvalidArgumentException('Empty json payload');
         }
 
-        $this->assertAllItemsHaveSameFields($rawPayload);
-
         $payload = new Payload();
         collect($rawPayload)
-            ->map(function ($rawPayloadItem) {
+            ->map(function ($rawPayloadItem) use ($fields) {
                 $payloadItem = new PayloadItem();
                 collect($rawPayloadItem)
                     ->each(fn ($value, $fieldName) => $payloadItem->set($fieldName, $value));
+
+                if (collect($fields)->diff($payloadItem->getFields())->isNotEmpty()) {
+                    throw new \InvalidArgumentException('Received illegal fields for chosen template');
+                }
+
                 return $payloadItem;
             })
             ->each(fn (PayloadItem $payloadItem) => $payload->add($payloadItem));
 
         return $payload;
-    }
-
-    private function assertAllItemsHaveSameFields(array $rawPayload): void
-    {
-        $firstItemHeaders = array_keys($rawPayload[0]);
-        $allItemsHaveSameHeaders = collect($rawPayload)
-            ->filter(fn ($rawPayloadItem) => collect($firstItemHeaders)->diff(array_keys($rawPayloadItem))->isNotEmpty())
-            ->isEmpty();
-
-        if (!$allItemsHaveSameHeaders) {
-            throw new \InvalidArgumentException('Some items of provided payload have different field names');
-        }
     }
 }

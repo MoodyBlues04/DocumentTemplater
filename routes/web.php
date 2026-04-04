@@ -30,7 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('document', \App\Http\Controllers\DocumentController::class)
         ->except(['edit', 'update', 'show']);
-    Route::post('/document/{id}/download', [\App\Http\Controllers\DocumentController::class, 'download'])
+    Route::get('/document/{document}/download', [\App\Http\Controllers\DocumentController::class, 'download'])
         ->name('document.download');
 });
 

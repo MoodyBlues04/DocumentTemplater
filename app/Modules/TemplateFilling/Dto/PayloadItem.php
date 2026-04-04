@@ -15,4 +15,12 @@ class PayloadItem
     {
         return $this->data[$field] ?? throw new \InvalidArgumentException("Invalid payload field: $field");
     }
+
+    /**
+     * @return string[]
+     */
+    public function getFields(): array
+    {
+        return array_keys($this->data);
+    }
 }

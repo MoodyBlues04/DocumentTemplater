@@ -9,5 +9,9 @@ use Illuminate\Http\UploadedFile;
 interface PayloadParser
 {
     public function supports(PayloadType $payloadType): bool;
-    public function parse(UploadedFile $payloadFile): Payload;
+
+    /**
+     * @param string[] $fields
+     */
+    public function parse(UploadedFile $payloadFile, array $fields): Payload;
 }

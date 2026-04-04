@@ -43,7 +43,7 @@ export default function DocumentsIndex({ documents }) {
                                             <td className="px-6 py-4 text-sm text-gray-500">{document.template.name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
-                                                    onClick={() => router.get(route('document.download', document.id))}
+                                                    onClick={() => window.location.href = route('document.download', document.id)}
                                                     className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-3 rounded text-sm transition duration-150"
                                                     style={{marginRight: '10px'}}
                                                 >

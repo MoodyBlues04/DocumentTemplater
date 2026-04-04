@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-zip": "*",
         "fpdf/fpdf": "^1.86",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
@@ -14,6 +15,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "setasign/fpdi": "^2.6",
+        "setasign/tfpdf": "^1.33",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

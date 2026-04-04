@@ -40,7 +40,7 @@ readonly class TemplateService
             $templateOrientation = Orientation::from($request->input('orientation'));
             $now = now()->timestamp;
 
-            $file = $this->fileService->create(
+            $file = $this->fileService->store(
                  "$templateName-$now" . self::TEMPLATE_FILE_EXTENSION,
                 self::TEMPLATE_FILE_STORAGE_DIR,
                 $userId,

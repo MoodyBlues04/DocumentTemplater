@@ -3,6 +3,7 @@
 namespace App\Modules\TemplateFilling;
 
 use App\Models\Template;
+use App\Models\TemplateField;
 use App\Modules\TemplateFilling\Dto\PayloadType;
 use App\Modules\TemplateFilling\Parser\PayloadParserRegister;
 use Illuminate\Http\UploadedFile;
@@ -12,24 +13,31 @@ readonly class TemplateFillingFacade
 {
     public function __construct(
         private PayloadParserRegister $payloadParserRegister,
+        private TemplateFiller $templateFiller,
+        private DocumentCompressor $documentCompressor,
     )
     {
     }
 
-    public function fill(Template $template, UploadedFile $payloadFile): File
+    /**
+     * @return string filled template path
+     * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
+     * @throws \setasign\Fpdi\PdfParser\Filter\FilterException
+     * @throws \setasign\Fpdi\PdfParser\PdfParserException
+     * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
+     * @throws \setasign\Fpdi\PdfReader\PdfReaderException
+     */
+    public function fill(Template $template, UploadedFile $payloadFile): string
     {
-        // todo 3) TemplateFiller fill template fields
-        // todo 4) compress to zip
-        // todo 5) return
-
         $payloadType = PayloadType::fromExtension($payloadFile->extension());
         $parser = $this->payloadParserRegister->get($payloadType);
 
-        $payload = $parser->parse($payloadFile);
+        $expectedFieldNames = $template->fields->map(fn (TemplateField $field) => $field->name)->all();
 
-        dd($payload);
+        $payload = $parser->parse($payloadFile, $expectedFieldNames);
 
+        $documentsBufferDir = $this->templateFiller->fill($template, $payload);
 
-        return new File($payloadFile->getRealPath());
+        return $this->documentCompressor->compress($template, $documentsBufferDir);
     }
 }
