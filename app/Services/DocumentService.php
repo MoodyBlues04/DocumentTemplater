@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Http\Requests\DocumentStoreRequest;
 use App\Models\Document;
 use App\Models\Template;
-use App\Services\TemplateFilling\TemplateFillingFacade;
+use App\Modules\TemplateFilling\TemplateFillingFacade;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
