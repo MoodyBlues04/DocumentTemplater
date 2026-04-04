@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create(self::TABLE_NAME, function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('file_id')->constrained();
             $table->string('name');
             $table->timestamps();

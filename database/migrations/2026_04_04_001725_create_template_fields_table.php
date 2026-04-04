@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create(self::TABLE_NAME, function (Blueprint $table) {
             $table->id();
-            $table->foreignId('template_id')->constrained();
+            $table->foreignId('template_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('font_size');
             $table->string('name');
             $table->string('font_name');

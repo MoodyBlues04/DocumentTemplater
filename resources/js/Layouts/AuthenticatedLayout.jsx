@@ -3,7 +3,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -11,8 +11,41 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    const { flash } = usePage().props;
+    const [showFlash, setShowFlash] = useState(false);
+
+    useEffect(() => {
+        if (flash?.success || flash?.error || flash?.warning) {
+            setShowFlash(true);
+            const timer = setTimeout(() => setShowFlash(false), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
+
     return (
         <div className="min-h-screen bg-gray-100">
+            {showFlash && (
+                <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
+                    {flash.success && (
+                        <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
+                            <span>{flash.success}</span>
+                            <button onClick={() => setShowFlash(false)} className="ml-4 text-white font-bold">×</button>
+                        </div>
+                    )}
+                    {flash.error && (
+                        <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
+                            <span>{flash.error}</span>
+                            <button onClick={() => setShowFlash(false)} className="ml-4 text-white font-bold">×</button>
+                        </div>
+                    )}
+                    {flash.warning && (
+                        <div className="bg-yellow-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
+                            <span>{flash.warning}</span>
+                            <button onClick={() => setShowFlash(false)} className="ml-4 text-white font-bold">×</button>
+                        </div>
+                    )}
+                </div>
+            )}
             <nav className="border-b border-gray-100 bg-white">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
@@ -29,6 +62,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                     active={route().current('dashboard')}
                                 >
                                     Dashboard
+                                </NavLink>
+                                <NavLink
+                                    href={route('template.index')}
+                                    active={route().current('template.index')}
+                                >
+                                    Templates
                                 </NavLink>
                             </div>
                         </div>

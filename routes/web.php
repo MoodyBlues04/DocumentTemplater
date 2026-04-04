@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('template', \App\Http\Controllers\TemplateController::class)
+    ->except(['show'])
     ->middleware(['auth', 'verified']);
 
 require __DIR__.'/auth.php';

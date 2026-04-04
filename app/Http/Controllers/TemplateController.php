@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TemplateStoreRequest;
+use App\Models\Template;
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class TemplateController extends Controller
 {
@@ -16,7 +20,12 @@ class TemplateController extends Controller
      */
     public function index()
     {
-        //
+        $templates = $this->templateService->getAllByUserId(auth()->id())
+            ->sortBy('id', SORT_ASC)
+            ->all();
+        return Inertia::render('Template/Index', [
+            'templates' => $templates,
+        ]);
     }
 
     /**
@@ -24,46 +33,59 @@ class TemplateController extends Controller
      */
     public function create()
     {
-        //
+        Gate::authorize('create', Template::class);
+        return Inertia::render('Template/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TemplateStoreRequest $request)
     {
-        //
-    }
+        Gate::authorize('create', Template::class);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        $template = $this->templateService->create($request);
+
+        return redirect()
+            ->route('template.edit', $template)
+            ->with('success', 'Template created');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Template $template)
     {
-        //
+        Gate::authorize('update', $template);
+
+        return Inertia::render('Template/Edit', [
+            'template' => $template->load('file'),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Template $template)
     {
-        //
+        Gate::authorize('update', $template);
+
+        return redirect()
+            ->route('template.index')
+            ->with('warning', "Update not supported yet. Tried to update $template->id");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Template $template)
     {
-        //
+        Gate::authorize('delete', $template);
+
+        $this->templateService->delete($template);
+
+        return redirect()
+            ->route('template.index')
+            ->with('success', 'Template deleted successfully!');
     }
 }
