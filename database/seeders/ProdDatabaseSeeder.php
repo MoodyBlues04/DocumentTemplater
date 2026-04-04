@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+class ProdDatabaseSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,9 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
-            FileSeeder::class,
-            TemplateSeeder::class,
+            FontSeeder::class,
         ]);
     }
 }

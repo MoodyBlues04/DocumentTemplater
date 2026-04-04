@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TemplateStoreRequest;
 use App\Http\Requests\TemplateUpdateRequest;
+use App\Models\Enum\FontColor;
 use App\Models\Enum\Orientation;
 use App\Models\Template;
+use App\Services\FontService;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class TemplateController extends Controller
 {
-    public function __construct(private readonly TemplateService $templateService)
+    public function __construct(
+        private readonly TemplateService $templateService,
+        private readonly FontService $fontService,
+    )
     {
     }
 
@@ -64,6 +69,8 @@ class TemplateController extends Controller
         return Inertia::render('Template/Edit', [
             'template' => $template->load('file'),
             'orientations' => Orientation::cases(),
+            'fonts' => $this->fontService->getAll()->all(),
+            'fontColors' => FontColor::cases(),
         ]);
     }
 

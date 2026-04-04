@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Enum\FontColor;
 use App\Models\Enum\Orientation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Exists;
 
 class TemplateUpdateRequest extends FormRequest
 {
@@ -29,13 +29,13 @@ class TemplateUpdateRequest extends FormRequest
             'name' => 'required|string|min:1|max:100',
             'orientation' => 'required|string|' . Rule::enum(Orientation::class),
 
-            'fields.*.id' => 'nullable|integer|' . Rule::exists('template_field', 'id'),
+            'fields.*.id' => 'nullable|integer|' . Rule::exists('template_fields', 'id'),
             'fields.*.is_deleted' => 'required|boolean',
 
             'fields.*.name' => 'required|string|min:1|max:100',
             'fields.*.font_size' => 'required|integer|min:1',
-            'fields.*.font_name' => 'required|string', // todo enum
-            'fields.*.font_color' => 'required|string', // todo enum
+            'fields.*.font_id' => 'required|integer|' . Rule::exists('fonts', 'id'),
+            'fields.*.font_color' => 'required|string|' . Rule::enum(FontColor::class),
             'fields.*.height' => 'required|integer|min:1',
             'fields.*.width' => 'required|integer|min:1',
             'fields.*.x_coordinate' => 'required|integer|min:1',
