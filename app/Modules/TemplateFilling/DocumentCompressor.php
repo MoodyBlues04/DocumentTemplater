@@ -4,6 +4,7 @@ namespace App\Modules\TemplateFilling;
 
 use App\Models\Template;
 use App\Modules\Zip\FileArchivator;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 readonly class DocumentCompressor
@@ -21,7 +22,9 @@ readonly class DocumentCompressor
 
         $this->fileArchivator->archive($documentsBufferDir, $archiveFullPath);
 
-        Storage::deleteDirectory($documentsBufferDir);
+        if (File::exists($documentsBufferDir)) {
+            File::deleteDirectory($documentsBufferDir);
+        }
 
         return $archiveFilePath;
     }

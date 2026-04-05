@@ -2,10 +2,10 @@
 import { useForm, Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function DocumentsCreate({ templates }) {
+export default function DocumentsCreate({ templates, template_id }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
-        template_id: '',
+        template_id: template_id ?? '',
         file: null,
     });
 
@@ -58,7 +58,7 @@ export default function DocumentsCreate({ templates }) {
                                     >
                                         <option value="">-- Choose a template --</option>
                                         {templates.map((template) => (
-                                            <option key={template.id} value={template.id}>
+                                            <option key={template.id} value={template.id} selected={template.id === data.template_id}>
                                                 {template.name}
                                             </option>
                                         ))}

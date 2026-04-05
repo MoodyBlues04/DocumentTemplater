@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class DocumentStoreRequest extends FormRequest
+class DocumentCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +25,7 @@ class DocumentStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:1|max:100',
-            'template_id' => 'required|integer|' . Rule::exists(Template::class, 'id'),
-            'file' => 'required|file|mimes:csv,xlsx,xls,json|max:10240',
+            'template_id' => 'nullable|integer|' . Rule::exists(Template::class, 'id')
         ];
     }
 }

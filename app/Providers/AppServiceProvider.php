@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\File;
 use App\Modules\TemplateFilling\Parser\ExcelParser;
 use App\Modules\TemplateFilling\Parser\JsonParser;
 use App\Modules\TemplateFilling\Parser\PayloadParser;
 use App\Modules\TemplateFilling\Parser\PayloadParserRegister;
+use App\Observers\FileObserver;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;

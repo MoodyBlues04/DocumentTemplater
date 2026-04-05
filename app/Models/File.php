@@ -21,8 +21,6 @@ class File extends Model
         'path',
     ];
 
-    // todo clear storage on delete
-
     public function getFullPath(): string
     {
         return Storage::disk('public')->path($this->path);

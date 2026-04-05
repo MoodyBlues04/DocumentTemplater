@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DocumentCreateRequest;
 use App\Http\Requests\DocumentStoreRequest;
 use App\Models\Document;
-use App\Models\File;
 use App\Services\DocumentService;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Gate;
@@ -36,7 +36,7 @@ class DocumentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(DocumentCreateRequest $request)
     {
         Gate::authorize('create', Document::class);
 
@@ -44,6 +44,7 @@ class DocumentController extends Controller
 
         return Inertia::render('Document/Create', [
             'templates' => $templates,
+            'template_id' => $request->query('template_id')
         ]);
     }
 

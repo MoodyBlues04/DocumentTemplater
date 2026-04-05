@@ -46,6 +46,13 @@ export default function TemplatesIndex({ templates }) {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{template.fields.map((field) => `"${field.name}"`).join(', ')}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
+                                                    onClick={() => router.get(route('document.create', {template_id: template.id}))}
+                                                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm transition duration-150"
+                                                    style={{marginRight: '10px'}}
+                                                >
+                                                    Fill
+                                                </button>
+                                                <button
                                                     onClick={() => router.get(route('template.edit', template.id))}
                                                     className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-3 rounded text-sm transition duration-150"
                                                     style={{marginRight: '10px'}}

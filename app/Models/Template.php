@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enum\Orientation;
+use App\Models\Traits\HasFile;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Template extends Model
 {
-    use HasFactory;
+    use HasFactory, HasFile;
 
     protected $fillable = [
         'user_id',
