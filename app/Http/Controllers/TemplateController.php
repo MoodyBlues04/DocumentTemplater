@@ -68,8 +68,18 @@ class TemplateController extends Controller
     {
         Gate::authorize('update', $template);
 
+        $template->load(['file', 'fields.font']);
+
+        // Use a relative URL so the browser resolves it against the current page
+        // origin (avoids APP_URL mismatch when serving via `php artisan serve`).
+        // Skip absolute/fake seeded paths (e.g. faker filePath() like "/tmp/...").
+        $fileUrl = $template->file && ! str_starts_with($template->file->path, '/')
+            ? '/storage/'.$template->file->path
+            : null;
+
         return Inertia::render('Template/Edit', [
-            'template' => $template->load('file'),
+            'template' => $template,
+            'fileUrl' => $fileUrl,
             'orientations' => Orientation::cases(),
             'fonts' => $this->fontService->getAll()->all(),
             'fontColors' => FontColor::cases(),

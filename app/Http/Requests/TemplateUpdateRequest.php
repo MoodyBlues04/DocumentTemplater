@@ -40,8 +40,8 @@ class TemplateUpdateRequest extends FormRequest
             'fields.*.font_color' => 'required|string|' . Rule::enum(FontColor::class),
             'fields.*.height' => 'required|integer|min:1',
             'fields.*.width' => 'required|integer|min:1',
-            'fields.*.x_coordinate' => 'required|integer|min:1',
-            'fields.*.y_coordinate' => 'required|integer|min:1',
+            'fields.*.x_coordinate' => 'required|integer|min:0',
+            'fields.*.y_coordinate' => 'required|integer|min:0',
         ];
     }
 }

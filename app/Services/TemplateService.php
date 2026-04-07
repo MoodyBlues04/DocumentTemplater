@@ -15,6 +15,13 @@ readonly class TemplateService
     private const TEMPLATE_FILE_STORAGE_DIR = 'templates';
     private const TEMPLATE_FILE_EXTENSION = '.pdf';
 
+    /** Explicit allow-list of columns accepted by TemplateField::upsert(). */
+    private const FIELD_COLUMNS = [
+        'id', 'template_id', 'font_id', 'name',
+        'font_size', 'font_color', 'height', 'width',
+        'x_coordinate', 'y_coordinate',
+    ];
+
     public function __construct(private FileService $fileService)
     {
     }
@@ -71,12 +78,17 @@ readonly class TemplateService
         $templateFieldIdsToDelete = $request->collect('fields')
             ->filter(fn ($field) => $field['is_deleted'] === true)
             ->pluck('id')
+            ->filter() // drop nulls — newly-created fields that were never persisted have no id
             ->unique()
             ->all();
 
+        if (empty($templateFieldIdsToDelete)) {
+            return;
+        }
+
         $deletedCount = TemplateField::query()
             ->where('template_id', $templateId)
-            ->where('id', 'in', $templateFieldIdsToDelete)
+            ->whereIn('id', $templateFieldIdsToDelete)
             ->delete();
 
         if (count($templateFieldIdsToDelete) !== $deletedCount) {
@@ -86,9 +98,14 @@ readonly class TemplateService
 
     private function upsertFields(TemplateUpdateRequest $request, int $templateId): void
     {
+        $allowedKeys = array_flip(self::FIELD_COLUMNS);
+
         $updatedTemplateFields = $request->collect('fields')
             ->filter(fn ($field) => $field['is_deleted'] === false)
-            ->map(fn ($templateField) => array_merge($templateField, ['template_id' => $templateId]))
+            ->map(fn ($templateField) => array_merge(
+                array_intersect_key($templateField, $allowedKeys),
+                ['template_id' => $templateId]
+            ))
             ->all();
 
         TemplateField::query()->upsert($updatedTemplateFields, ['id']);
