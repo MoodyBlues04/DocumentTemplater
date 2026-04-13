@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { PDF_SCALE } from '@/lib/pdfCoords';
+import { PDF_SCALE, pxToMm } from '@/lib/pdfCoords';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, children }) {
+const DRAG_THRESHOLD = 4;
+
+export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, onSizeChange, children }) {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
+    const onSizeChangeRef = useRef(onSizeChange);
+    onSizeChangeRef.current = onSizeChange;
+    const dragRef = useRef({ moved: false });
+    const [dragging, setDragging] = useState(false);
     const [size, setSize] = useState({ width: 0, height: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,6 +41,7 @@ export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, c
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 setSize({ width: viewport.width, height: viewport.height });
+                onSizeChangeRef.current?.(pxToMm(viewport.width, scale), pxToMm(viewport.height, scale));
 
                 renderTask = page.render({ canvasContext: ctx, viewport });
                 await renderTask.promise;
@@ -54,11 +61,44 @@ export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, c
         };
     }, [fileUrl, scale]);
 
+    const handleMouseDown = (e) => {
+        if (e.button !== 0) return;
+        dragRef.current = { moved: false };
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        // Scroll only the nearest scrollable ancestor (the PDF container wrapper)
+        const scrollEl = containerRef.current?.parentElement ?? null;
+        const startScrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
+        const startScrollTop  = scrollEl ? scrollEl.scrollTop  : 0;
+
+        const handleMove = (ev) => {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            if (!dragRef.current.moved && Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD) {
+                dragRef.current.moved = true;
+                setDragging(true);
+            }
+            if (dragRef.current.moved && scrollEl) {
+                scrollEl.scrollLeft = startScrollLeft - dx;
+                scrollEl.scrollTop  = startScrollTop  - dy;
+            }
+        };
+
+        const handleUp = () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleUp);
+            setDragging(false);
+        };
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleUp);
+    };
+
     const handleClick = (e) => {
+        if (dragRef.current.moved) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const xPx = e.clientX - rect.left;
-        const yPx = e.clientY - rect.top;
-        onCanvasClick?.(xPx, yPx);
+        onCanvasClick?.(e.clientX - rect.left, e.clientY - rect.top);
     };
 
     if (!fileUrl) {
@@ -70,7 +110,7 @@ export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, c
     }
 
     return (
-        <div className="border rounded-md inline-block bg-white relative">
+        <div className="border rounded-md bg-white relative mx-auto" style={{ width: 'fit-content' }}>
             {loading && (
                 <div className="absolute inset-0 flex items-center justify-center text-gray-500 z-10">
                     Loading PDF…
@@ -82,23 +122,14 @@ export default function PdfCanvas({ fileUrl, scale = PDF_SCALE, onCanvasClick, c
                 </div>
             )}
             <div
-                style={{
-                    width:  size.width  > 0 ? Math.max(size.width,  Math.round(size.width  * PDF_SCALE / scale)) : 0,
-                    height: size.height > 0 ? Math.max(size.height, Math.round(size.height * PDF_SCALE / scale)) : 0,
-                }}
+                ref={containerRef}
+                className={`relative select-none ${dragging ? 'cursor-grabbing' : 'cursor-crosshair'}`}
+                style={{ width: size.width, height: size.height }}
+                onMouseDown={handleMouseDown}
+                onClick={handleClick}
             >
-                <div
-                    ref={containerRef}
-                    className="relative mx-auto"
-                    style={{
-                        width: size.width,
-                        height: size.height,
-                    }}
-                    onClick={handleClick}
-                >
-                    <canvas ref={canvasRef} className="block pointer-events-none" />
-                    {children}
-                </div>
+                <canvas ref={canvasRef} className="block pointer-events-none" />
+                {children}
             </div>
         </div>
     );

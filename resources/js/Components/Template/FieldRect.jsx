@@ -1,10 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-    mmToPx,
-    pxToMm,
-    MIN_FIELD_SIZE_MM,
-    PDF_SCALE,
-} from '@/lib/pdfCoords';
+import { useRef } from 'react';
+import { mmToPx, pxToMm, MIN_FIELD_SIZE_MM, PDF_SCALE } from '@/lib/pdfCoords';
 
 const HANDLES = ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'];
 
@@ -20,7 +15,7 @@ const HANDLE_POS = {
     se: '-right-1 -bottom-1 cursor-nwse-resize',
 };
 
-export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange, onSelect }) {
+export default function FieldRect({ field, scale = PDF_SCALE, docWidthMm = Infinity, docHeightMm = Infinity, selected, onChange, onSelect }) {
     const x = mmToPx(field.x_coordinate, scale);
     const y = mmToPx(field.y_coordinate, scale);
     const w = mmToPx(field.width, scale);
@@ -31,16 +26,13 @@ export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange
     const fieldRef = useRef(field);
     const onChangeRef = useRef(onChange);
     const scaleRef = useRef(scale);
+    const docWRef = useRef(docWidthMm);
+    const docHRef = useRef(docHeightMm);
     fieldRef.current = field;
     onChangeRef.current = onChange;
     scaleRef.current = scale;
-
-    const [editing, setEditing] = useState(false);
-    const inputRef = useRef(null);
-
-    useEffect(() => {
-        if (editing) inputRef.current?.focus();
-    }, [editing]);
+    docWRef.current = docWidthMm;
+    docHRef.current = docHeightMm;
 
     const startInteraction = (mode) => (e) => {
         e.stopPropagation();
@@ -62,15 +54,19 @@ export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange
             const currentField = fieldRef.current;
             const currentOnChange = onChangeRef.current;
             const currentScale = scaleRef.current;
+            const docW = docWRef.current;
+            const docH = docHRef.current;
             const minPx = mmToPx(MIN_FIELD_SIZE_MM, currentScale);
 
             if (mode === 'drag') {
                 const nx = Math.max(0, start.origX + dx);
                 const ny = Math.max(0, start.origY + dy);
+                const xMm = pxToMm(nx, currentScale);
+                const yMm = pxToMm(ny, currentScale);
                 currentOnChange({
                     ...currentField,
-                    x_coordinate: pxToMm(nx, currentScale),
-                    y_coordinate: pxToMm(ny, currentScale),
+                    x_coordinate: docW > 0 ? Math.min(xMm, Math.max(0, docW - currentField.width)) : xMm,
+                    y_coordinate: docH > 0 ? Math.min(yMm, Math.max(0, docH - currentField.height)) : yMm,
                 });
                 return;
             }
@@ -93,12 +89,16 @@ export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange
                 nh = newH;
             }
 
+            const xMm = pxToMm(Math.max(0, nx), currentScale);
+            const yMm = pxToMm(Math.max(0, ny), currentScale);
+            const wMm = Math.max(MIN_FIELD_SIZE_MM, pxToMm(nw, currentScale));
+            const hMm = Math.max(MIN_FIELD_SIZE_MM, pxToMm(nh, currentScale));
             currentOnChange({
                 ...currentField,
-                x_coordinate: pxToMm(Math.max(0, nx), currentScale),
-                y_coordinate: pxToMm(Math.max(0, ny), currentScale),
-                width: Math.max(1, pxToMm(nw, currentScale)),
-                height: Math.max(1, pxToMm(nh, currentScale)),
+                x_coordinate: xMm,
+                y_coordinate: yMm,
+                width:  docW > 0 ? Math.min(wMm, docW - xMm) : wMm,
+                height: docH > 0 ? Math.min(hMm, docH - yMm) : hMm,
             });
         }
 
@@ -112,22 +112,16 @@ export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange
     };
 
     const rectClass = [
-        'absolute box-border select-none',
+        'absolute box-border select-none cursor-move',
         selected
             ? 'border-2 border-solid border-blue-600 bg-blue-600/10'
             : 'border-[1.5px] border-dashed border-blue-600 bg-blue-600/5',
-        editing ? 'cursor-text' : 'cursor-move',
     ].join(' ');
 
     return (
         <div
-            onMouseDown={editing ? undefined : startInteraction('drag')}
+            onMouseDown={startInteraction('drag')}
             onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
-            onDoubleClick={(e) => {
-                e.stopPropagation();
-                onSelect?.();
-                setEditing(true);
-            }}
             className={rectClass}
             style={{ left: x, top: y, width: w, height: h }}
             title={field.name}
@@ -136,43 +130,12 @@ export default function FieldRect({ field, scale = PDF_SCALE, selected, onChange
                 {field.name}
             </span>
 
-            {editing ? (
-                <textarea
-                    ref={inputRef}
-                    value={field.preview_text ?? ''}
-                    onChange={(e) => {
-                        const el = e.target;
-                        el.style.height = 'auto';
-                        el.style.height = el.scrollHeight + 'px';
-                        onChange({
-                            ...field,
-                            preview_text: e.target.value,
-                            height: Math.max(MIN_FIELD_SIZE_MM, pxToMm(el.scrollHeight + 8, scale)),
-                        });
-                    }}
-                    onBlur={() => setEditing(false)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Escape') { e.preventDefault(); setEditing(false); }
-                        e.stopPropagation();
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    rows={1}
-                    className="absolute left-1 right-1 top-1/2 -translate-y-1/2 bg-transparent border-0 outline-none p-0 leading-[1.2] text-center resize-none overflow-hidden"
-                    style={{
-                        fontSize: field.font_size * scale,
-                        color: field.font_color,
-                        fontFamily: 'inherit',
-                    }}
-                />
-            ) : field.preview_text ? (
-                <span
-                    className="absolute left-1 right-1 top-1/2 -translate-y-1/2 overflow-hidden whitespace-pre-wrap break-words leading-[1.2] text-center pointer-events-none"
-                    style={{ fontSize: field.font_size * scale, color: field.font_color }}
-                >
-                    {field.preview_text}
-                </span>
-            ) : null}
+            <span
+                className="absolute left-1 right-1 top-1/2 -translate-y-1/2 overflow-hidden whitespace-pre-wrap break-words leading-[1.2] text-center pointer-events-none"
+                style={{ fontSize: field.font_size * scale, color: field.font_color }}
+            >
+                sample text...
+            </span>
 
             {selected && HANDLES.map((dir) => (
                 <div
