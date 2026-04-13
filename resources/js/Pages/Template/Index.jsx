@@ -30,7 +30,6 @@ export default function TemplatesIndex({ templates }) {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orientation</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fields</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -41,9 +40,25 @@ export default function TemplatesIndex({ templates }) {
                                         <tr key={template.id}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{template.id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{template.name}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{template.orientation}</td>
                                             <td className="px-6 py-4 text-sm text-gray-500">{template.file.id}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{template.fields.map((field) => `"${field.name}"`).join(', ')}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500 max-w-xs">
+                                                {(() => {
+                                                    const MAX = 60;
+                                                    const names = template.fields.map((f) => `"${f.name}"`);
+                                                    const parts = [];
+                                                    let len = 0;
+                                                    for (const name of names) {
+                                                        const add = parts.length ? 2 + name.length : name.length;
+                                                        if (len + add > MAX) break;
+                                                        parts.push(name);
+                                                        len += add;
+                                                    }
+                                                    const rest = names.length - parts.length;
+                                                    return rest > 0
+                                                        ? `${parts.join(', ')}, … (+${rest})`
+                                                        : parts.join(', ');
+                                                })()}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={() => router.get(route('document.create', {template_id: template.id}))}
