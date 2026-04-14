@@ -26,6 +26,11 @@ class File extends Model
         return Storage::disk('public')->path($this->path);
     }
 
+    public function getPublicUrl(): string
+    {
+        return Storage::url($this->path);
+    }
+
     public function getExtension(): string
     {
         return \Illuminate\Support\Facades\File::extension($this->path);

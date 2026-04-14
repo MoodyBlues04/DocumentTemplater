@@ -29,9 +29,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TemplateField extends Model
 {
     use HasFactory;
-    protected $fillable = [
+
+    public const FILLABLE = [
         'template_id',
         'font_id',
+        'name',
         'font_size',
         'font_color',
         'height',
@@ -39,6 +41,8 @@ class TemplateField extends Model
         'x_coordinate',
         'y_coordinate',
     ];
+
+    protected $fillable = self::FILLABLE;
 
     protected $casts = [
         'font_color' => FontColor::class,
