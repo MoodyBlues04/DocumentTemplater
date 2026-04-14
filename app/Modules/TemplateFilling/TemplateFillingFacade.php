@@ -7,7 +7,6 @@ use App\Models\TemplateField;
 use App\Modules\TemplateFilling\Dto\PayloadType;
 use App\Modules\TemplateFilling\Parser\PayloadParserRegister;
 use Illuminate\Http\UploadedFile;
-use Symfony\Component\HttpFoundation\File\File;
 
 readonly class TemplateFillingFacade
 {

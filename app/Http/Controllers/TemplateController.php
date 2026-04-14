@@ -29,6 +29,7 @@ class TemplateController extends Controller
         $templates = $this->templateService->getAllByUserId(auth()->id())
             ->sortBy('id', SORT_ASC)
             ->all();
+
         return Inertia::render('Template/Index', [
             'templates' => $templates,
         ]);
@@ -40,6 +41,7 @@ class TemplateController extends Controller
     public function create()
     {
         Gate::authorize('create', Template::class);
+
         return Inertia::render('Template/Create', [
             'orientations' => Orientation::cases(),
         ]);
@@ -85,7 +87,7 @@ class TemplateController extends Controller
 
         return redirect()
             ->route('template.index')
-            ->with('warning', "Template '$template->name' updated successfully");
+            ->with('success', "Template '$template->name' updated successfully");
     }
 
     /**
