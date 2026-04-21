@@ -19,5 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->renderable(function (\App\Exceptions\BaseException $e, $request) {
+            if ($request->expectsJson()) {
+                return null;
+            }
+
+            return redirect()->back()->with('error', $e->getMessage());
+        });
     })->create();

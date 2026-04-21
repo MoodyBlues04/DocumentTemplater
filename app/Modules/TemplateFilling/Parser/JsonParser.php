@@ -2,6 +2,7 @@
 
 namespace App\Modules\TemplateFilling\Parser;
 
+use App\Exceptions\TemplateFillingException;
 use App\Modules\TemplateFilling\Dto\Payload;
 use App\Modules\TemplateFilling\Dto\PayloadItem;
 use App\Modules\TemplateFilling\Dto\PayloadType;
@@ -19,7 +20,7 @@ class JsonParser implements PayloadParser
         $content = $payloadFile->getContent();
         $rawPayload = json_decode($content, true);
         if (empty($rawPayload)) {
-            throw new \InvalidArgumentException('Empty json payload');
+            throw new TemplateFillingException('Empty json payload');
         }
 
         $payload = new Payload();
@@ -30,7 +31,7 @@ class JsonParser implements PayloadParser
                     ->each(fn ($value, $fieldName) => $payloadItem->set($fieldName, $value));
 
                 if (collect($fields)->diff($payloadItem->getFields())->isNotEmpty()) {
-                    throw new \InvalidArgumentException('Received illegal fields for chosen template');
+                    throw new TemplateFillingException('Received illegal fields for chosen template');
                 }
 
                 return $payloadItem;

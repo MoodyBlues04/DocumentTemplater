@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\TemplateUpdateException;
 use App\Http\Requests\TemplateStoreRequest;
 use App\Http\Requests\TemplateUpdateRequest;
 use App\Models\Enum\Orientation;
@@ -86,7 +87,7 @@ readonly class TemplateService
             ->delete();
 
         if (count($templateFieldIdsToDelete) !== $deletedCount) {
-            throw new \RuntimeException('Cannot delete some fields'); // todo custom exception + handler
+            throw new TemplateUpdateException('Cannot delete some fields');
         }
     }
 

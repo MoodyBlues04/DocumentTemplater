@@ -59,7 +59,7 @@ class DocumentController extends Controller
 
         return redirect()
             ->route('document.index')
-            ->with("Document '$document->name' filled successfully");
+            ->with('success', "Document '$document->name' filled successfully");
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Modules\TemplateFilling\Parser;
 
+use App\Exceptions\TemplateFillingException;
 use App\Modules\TemplateFilling\Dto\Payload;
 use App\Modules\TemplateFilling\Dto\PayloadItem;
 use App\Modules\TemplateFilling\Dto\PayloadType;
@@ -21,14 +22,14 @@ class ExcelParser implements PayloadParser
     {
         $sheets = Excel::toArray([], $payloadFile);
         if (empty($sheets)) {
-            throw new \InvalidArgumentException('Empty payload'); // todo exceptions
+            throw new TemplateFillingException('Empty payload');
         }
 
         $payload = new Payload();
         foreach ($sheets as $sheet) {
             $headers = $this->getHeaders($sheet);
             if (collect($fields)->diff($headers)->isNotEmpty()) {
-                throw new \InvalidArgumentException('Received illegal fields for chosen template');
+                throw new TemplateFillingException('Received illegal fields for chosen template');
             }
             collect($sheet)
                 ->skip(1)
@@ -36,7 +37,7 @@ class ExcelParser implements PayloadParser
                     $payloadItem = new PayloadItem();
                     collect($row)
                         ->each(fn ($value, $columnIdx) => $payloadItem->set(
-                            $headers[$columnIdx] ?? throw new \InvalidArgumentException("No field name configured for column $columnIdx"),
+                            $headers[$columnIdx] ?? throw new TemplateFillingException("No field name configured for column $columnIdx"),
                             $value
                         ));
                     return $payloadItem;
@@ -49,6 +50,6 @@ class ExcelParser implements PayloadParser
 
     private function getHeaders(array $sheet): array
     {
-        return $sheet[0] ?? throw new \InvalidArgumentException('Cannot get sheets headers');
+        return $sheet[0] ?? throw new TemplateFillingException('Cannot get sheets headers');
     }
 }

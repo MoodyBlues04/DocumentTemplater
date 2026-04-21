@@ -2,6 +2,7 @@
 
 namespace App\Modules\Zip;
 
+use App\Exceptions\IOException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -15,7 +16,7 @@ readonly class FileArchivator
         $isOpened = $zip->open($archiveName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         if ($isOpened !== true) {
-            throw new \RuntimeException("Cannot open zip archive. Error code: $isOpened");
+            throw new IOException("Cannot open zip archive. Error code: $isOpened");
         }
 
         /** @var SplFileInfo[] $files */
