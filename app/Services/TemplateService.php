@@ -96,6 +96,7 @@ readonly class TemplateService
             ->filter(fn ($field) => $field['is_deleted'] === false)
             ->map(fn ($templateField) => array_merge($templateField, ['template_id' => $templateId]))
             ->map(fn ($templateField) => Arr::only($templateField, array_merge(TemplateField::FILLABLE, ['id'])))
+            ->map(fn ($templateField) => array_filter($templateField))
             ->all();
 
         TemplateField::query()->upsert($updatedTemplateFields, ['id']);

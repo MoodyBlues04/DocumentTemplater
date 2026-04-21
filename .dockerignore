@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+node_modules
+vendor
+storage/*.key
+storage/debugbar
+tests
+README.md
+.github
