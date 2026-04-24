@@ -7,6 +7,7 @@ use App\Modules\TemplateFilling\Dto\Payload;
 use App\Modules\TemplateFilling\Dto\PayloadItem;
 use App\Modules\TemplateFilling\Dto\PayloadType;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExcelParser implements PayloadParser
@@ -27,19 +28,30 @@ class ExcelParser implements PayloadParser
 
         $payload = new Payload();
         foreach ($sheets as $sheet) {
-            $headers = $this->getHeaders($sheet);
+            $headers = array_filter($this->getHeaders($sheet));
             if (collect($fields)->diff($headers)->isNotEmpty()) {
                 throw new TemplateFillingException('Received illegal fields for chosen template');
             }
+
             collect($sheet)
                 ->skip(1)
-                ->map(function (array $row) use ($headers) {
+                ->map(
+                    fn ($row) => collect($row)
+                        ->only(array_keys($headers))
+                        ->filter(fn ($value) => !empty($value))
+                        ->mapWithKeys(fn ($value, $columnIdx) => [$headers[$columnIdx] => $value])
+                        ->collect()
+                )
+                ->filter(fn ($row) => $row->isNotEmpty())
+                ->map(function (Collection $row) use ($fields) {
                     $payloadItem = new PayloadItem();
-                    collect($row)
-                        ->each(fn ($value, $columnIdx) => $payloadItem->set(
-                            $headers[$columnIdx] ?? throw new TemplateFillingException("No field name configured for column $columnIdx"),
-                            $value
-                        ));
+
+                    $row->each(fn ($value, $headerName) => $payloadItem->set($headerName, $value));
+
+                    if (collect($fields)->diff($payloadItem->getFields())->isNotEmpty()) {
+                        throw TemplateFillingException::illegalFields($fields, $payloadItem->getFields());
+                    }
+
                     return $payloadItem;
                 })
                 ->each(fn ($payloadItem) => $payload->add($payloadItem));

@@ -15,7 +15,7 @@ class PayloadItem
 
     public function get(string $field): mixed
     {
-        return $this->data[$field] ?? throw new TemplateFillingException("Invalid payload field: $field");
+        return $this->data[$field] ?? throw new TemplateFillingException("Unknown payload field: '$field'");
     }
 
     /**

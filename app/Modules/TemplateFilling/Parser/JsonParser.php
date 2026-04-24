@@ -31,7 +31,7 @@ class JsonParser implements PayloadParser
                     ->each(fn ($value, $fieldName) => $payloadItem->set($fieldName, $value));
 
                 if (collect($fields)->diff($payloadItem->getFields())->isNotEmpty()) {
-                    throw new TemplateFillingException('Received illegal fields for chosen template');
+                    throw TemplateFillingException::illegalFields($fields, $payloadItem->getFields());
                 }
 
                 return $payloadItem;
