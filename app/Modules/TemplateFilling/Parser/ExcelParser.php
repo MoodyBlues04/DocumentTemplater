@@ -29,6 +29,9 @@ class ExcelParser implements PayloadParser
         $payload = new Payload();
         foreach ($sheets as $sheet) {
             $headers = array_filter($this->getHeaders($sheet));
+            if (empty($headers)) {
+                continue;
+            }
             if (collect($fields)->diff($headers)->isNotEmpty()) {
                 throw new TemplateFillingException('Received illegal fields for chosen template');
             }

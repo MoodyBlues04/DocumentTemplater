@@ -21,8 +21,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+    Route::get('/usage-guide', function () {
+        return Inertia::render('UsageGuide');
     })->name('dashboard');
 
     Route::resource('template', \App\Http\Controllers\TemplateController::class)
